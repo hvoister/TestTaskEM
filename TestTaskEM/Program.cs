@@ -1,20 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TestTaskEM
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            string filePath = "test.txt";
+            Console.Write("Print a district: ");
+            string district = Convert.ToString(Console.ReadLine());
+            DateTime firstDeliveryTime;
+            string inputTime;
+            do
+            {
+                Console.Write("Print a delivery time (YYYY-MM-DD HH:MM:SS): ");
+                inputTime = Console.ReadLine();
+            }
+            while (!DateTime.TryParseExact(inputTime, "yyyy-MM-dd HH:mm:ss", null, DateTimeStyles.None, out firstDeliveryTime));
+
+
+            var orders = GetOrders(filePath);
+            var filtredOrders = OrdersFiltration(orders, district, firstDeliveryTime);
+
+            Console.WriteLine();
+            foreach (var line in orders)
+            {
+                Console.WriteLine($"ID: {line.OrderID}\tWeight: {line.Weight}\tDistrict: {line.CityDistrict}\tTime: {line.DeliveryTime}\n");
+            }
         }
 
 
-        public List<Orders> GetOrders(string filePath)
+        public static List<Orders> GetOrders(string filePath)
         {
             var orders = new List<Orders>();
 
@@ -39,7 +62,7 @@ namespace TestTaskEM
         }
 
 
-        public List<Orders> OrdersFiltration(List<Orders> orders, string district, DateTime firstDeliveryTime)
+        public static List<Orders> OrdersFiltration(List<Orders> orders, string district, DateTime firstDeliveryTime)
         {
             DateTime filtredTime = firstDeliveryTime.AddMinutes(30);
 
