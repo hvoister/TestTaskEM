@@ -44,6 +44,7 @@ namespace TestTaskEM
             DateTime filtredTime = firstDeliveryTime.AddMinutes(30);
 
             return orders.Where(o => o.CityDistrict == district && o.DeliveryTime <= filtredTime).ToList();
+
         }
     }
 }
