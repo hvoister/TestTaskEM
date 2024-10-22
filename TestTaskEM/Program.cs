@@ -13,10 +13,11 @@ namespace TestTaskEM
     {
         static void Main(string[] args)
         {
+            string filePath = "test.txt";
+            string logFilePath = "logs.txt";
+
             if (File.Exists("test.txt"))
             {
-                string filePath = "test.txt";
-                string logFilePath = "logs.txt";
                 string district;
                 do
                 {
@@ -34,25 +35,37 @@ namespace TestTaskEM
                 }
                 while (!DateTime.TryParseExact(inputTime, "yyyy-MM-dd HH:mm:ss", null, DateTimeStyles.None, out firstDeliveryTime));
 
-
                 var orders = GetOrders(filePath);
                 Logging($"Loaded {orders.Count} orders.", logFilePath);
                 var filteredOrders = OrdersFiltration(orders, district, firstDeliveryTime);
                 Logging($"Found {filteredOrders.Count} orders for {district}.", logFilePath);
 
                 Console.WriteLine();
-                if (filteredOrders.Count > 0)
+                try
                 {
-                    foreach (var line in filteredOrders)
-                    {
-                        Console.WriteLine($"ID: {line.OrderID}\tWeight: {line.Weight}\tDistrict: {line.CityDistrict}\tTime: {line.DeliveryTime}\n");
-                        File.AppendAllText($"test_{district}.txt", $"ID: {line.OrderID}\tWeight: {line.Weight}\tDistrict: {line.CityDistrict}\tTime: {line.DeliveryTime}\n");
+                    if (filteredOrders.Count > 0)
+                    { 
+                        File.Delete($"test_{district}.txt");
+                        Logging("An old one result file are deleted.", logFilePath);
+                        foreach (var line in filteredOrders)
+                        {
+                            Console.WriteLine($"ID: {line.OrderID}\tWeight: {line.Weight}\tDistrict: {line.CityDistrict}\tTime: {line.DeliveryTime}\n");
+                            File.AppendAllText($"test_{district}.txt", $"ID: {line.OrderID}\tWeight: {line.Weight}\tDistrict: {line.CityDistrict}\tTime: {line.DeliveryTime}\n");
+                        }
+                        Logging("Created the result file and log file in the project folder.", logFilePath);
+                        Console.WriteLine("Created the result file and log file in the project folder.\n");
                     }
-                    Console.WriteLine("Created a result file and a log file in the project folder.\n");
+                    else Console.WriteLine("There is no data to output.");
                 }
-                else Console.WriteLine("There is no data to output.");
+                catch (Exception ex) { 
+                    Logging("An error occurred when creating the result or log file.", logFilePath);
+                }
             }
-            else Console.WriteLine("Add the data file (test.txt) to the project folder.");
+            else
+            { 
+                Console.WriteLine("Add the data file (test.txt) to the project folder.");
+                Logging($"Missing data file.", logFilePath);
+            }
             Console.ReadKey();
         }
 
@@ -84,9 +97,7 @@ namespace TestTaskEM
 
         public static List<Orders> OrdersFiltration(List<Orders> orders, string district, DateTime firstDeliveryTime)
         {
-            DateTime filtredTime = firstDeliveryTime.AddMinutes(30);
-
-            return orders.Where(o => o.CityDistrict == district && (filtredTime >= o.DeliveryTime && o.DeliveryTime >= firstDeliveryTime)).ToList();
+            return orders.Where(o => o.CityDistrict == district && (firstDeliveryTime.AddMinutes(30) >= o.DeliveryTime && o.DeliveryTime >= firstDeliveryTime)).ToList();
         }
 
         public static void Logging(string message, string logFilePath)
