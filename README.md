@@ -1,4 +1,4 @@
-#Delivery filtering programm
+#Delivery filtering program
 
 To get started with the delivery filtering program by area and time of the first delivery, please follow these steps:
 1) Download the program archive and extract it;
